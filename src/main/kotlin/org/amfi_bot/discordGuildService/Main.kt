@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 class Main {
     @GetMapping("/")
     fun root(): String {
-        return "Hello, World!"
+        return "Hello, discordGuildService!"
     }
 }
 
