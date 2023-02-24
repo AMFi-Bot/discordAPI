@@ -4,6 +4,9 @@
 # Ignore Gradle build output directory
 build
 
+# Ignore Maven build output dir
+target
+
 # Ignore IntelliJ IDEA files
 .idea
 

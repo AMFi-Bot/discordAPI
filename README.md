@@ -1,1 +1,1 @@
-# amfiBot discord guild management service
+# API for discord part of amfi bot
