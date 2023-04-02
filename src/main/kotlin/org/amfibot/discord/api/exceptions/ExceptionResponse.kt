@@ -7,6 +7,9 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Exception response entity for REST error responses
+ */
 class ExceptionResponse(
     private val status: HttpStatus,
     message: String? = null,
