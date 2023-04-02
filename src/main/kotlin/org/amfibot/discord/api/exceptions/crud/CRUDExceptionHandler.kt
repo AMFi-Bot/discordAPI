@@ -27,7 +27,8 @@ class CRUDExceptionHandler : ResponseEntityExceptionHandler() {
             .body(
                 ExceptionResponse(
                     status = HttpStatus.valueOf(400),
-                    message = "The resource already exists."
+                    message = "Bad request",
+                    error = "The resource already exists."
                 )
             )
     }
