@@ -1,4 +1,4 @@
-package  org.amfibot.discord.api.error
+package  org.amfibot.discord.api.exceptions
 
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonInclude

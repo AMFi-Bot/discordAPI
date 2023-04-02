@@ -1,6 +1,6 @@
 package  org.amfibot.discord.api.exceptions.crud
 
-import org.amfibot.discord.api.error.ExceptionResponse
+import org.amfibot.discord.api.exceptions.ExceptionResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler

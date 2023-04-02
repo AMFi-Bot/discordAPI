@@ -3,6 +3,7 @@ package org.amfibot.discord.api.error
 import jakarta.servlet.RequestDispatcher
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.amfibot.discord.api.exceptions.ExceptionResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.error.ErrorAttributeOptions
