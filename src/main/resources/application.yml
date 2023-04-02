@@ -1,11 +1,10 @@
 spring:
   data:
     mongodb:
-      uri: ${DISCORD_API_MONGO_URI}
-  #! Development only
-  devtools:
-    remote:
-      secret: ${DEVTOOLS_REMOTE_SECRET}
-    restart:
-      poll-interval: 3s
-      quiet-period: 2s
+      uri: ${AUTH_SERVICE_MONGO_URI}
+  profiles:
+    active: "prod"
+server:
+  error:
+    whitelabel:
+      enabled: false

@@ -1,6 +1,5 @@
 package org.amfibot.discord.api
 
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,5 +16,5 @@ class DiscordAPI {
 }
 
 fun main(args: Array<String>) {
-    runApplication<DiscordAPI>(*args);
+    runApplication<DiscordAPI>(*args)
 }
