@@ -1,4 +1,4 @@
-package org.amfibot.discord.api.error
+package org.amfibot.discord.api.config
 
 import jakarta.servlet.RequestDispatcher
 import jakarta.servlet.http.HttpServletRequest
