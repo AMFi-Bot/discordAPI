@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: ${AUTH_SERVICE_MONGO_URI}
+      uri: ${DISCORD_API_MONGO_URI}
   profiles:
     active: "prod"
 server:
