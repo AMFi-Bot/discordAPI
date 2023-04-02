@@ -13,25 +13,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 class CRUDExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(ResourceNotFoundException::class)
-    fun resourceNotFoundHandler(): ResponseEntity<ExceptionResponse> {
+    fun resourceNotFoundHandler(ex: ResourceNotFoundException): ResponseEntity<ExceptionResponse> {
         return ResponseEntity
             .status(404)
             .body(
                 ExceptionResponse(
                     status = HttpStatus.valueOf(404),
-                    message = "Resource not found."
+                    message = ex.message ?: "Resource not found."
                 )
             )
     }
     @ExceptionHandler(ResourceAlreadyExistsException::class)
-    fun resourceAlreadyExistsHandler(): ResponseEntity<ExceptionResponse> {
+    fun resourceAlreadyExistsHandler(ex: ResourceAlreadyExistsException): ResponseEntity<ExceptionResponse> {
         return ResponseEntity
             .status(400)
             .body(
                 ExceptionResponse(
                     status = HttpStatus.valueOf(400),
                     message = "Bad request",
-                    error = "The resource already exists."
+                    error = ex.message ?: "The resource already exists."
                 )
             )
     }
