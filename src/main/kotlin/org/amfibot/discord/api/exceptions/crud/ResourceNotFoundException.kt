@@ -1,3 +1,5 @@
 package org.amfibot.discord.api.exceptions.crud
 
-class ResourceNotFoundException : Exception("Resource is not found.")
+import org.amfibot.discord.api.exceptions.http.client.NotFoundException
+
+class ResourceNotFoundException(message: String? = null) : NotFoundException(message ?: "Resource is not found.")

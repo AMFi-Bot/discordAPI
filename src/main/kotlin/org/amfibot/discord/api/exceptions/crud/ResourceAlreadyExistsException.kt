@@ -1,3 +1,5 @@
 package org.amfibot.discord.api.exceptions.crud
 
-class ResourceAlreadyExistsException : Exception("The resource already exists")
+import org.amfibot.discord.api.exceptions.http.client.BadRequestException
+
+class ResourceAlreadyExistsException(message: String? = null) : BadRequestException(message ?: "The resource already exists")
