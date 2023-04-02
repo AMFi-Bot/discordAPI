@@ -1,11 +1,11 @@
 package org.amfibot.discord.api.guild
 
+import org.amfibot.discord.api.exceptions.crud.ResourceAlreadyExistsException
+import org.amfibot.discord.api.exceptions.crud.ResourceNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 /**
@@ -22,7 +22,23 @@ class GuildController(@Autowired private val repository: GuildRepository) {
      * Returns the discord guild object by guild id
      */
     @GetMapping("/{guildId}")
-    @Throws(NotFoundException::class)
     fun getGuild(@PathVariable guildId: String): Guild =
-        repository.findById(guildId).orElseThrow { NotFoundException() }
+        repository.findById(guildId).orElseThrow { ResourceNotFoundException() }
+
+    /**
+     * Creates a discord guild
+     */
+    @PostMapping
+    fun createGuild(@RequestBody guild: Guild) : ResponseEntity<Any?>{
+        val guildId = guild.id
+
+        if (repository.existsById(guildId))
+            throw ResourceAlreadyExistsException()
+
+        repository.insert(guild)
+
+        return ResponseEntity(HttpStatus.CREATED)
+    }
+
+
 }
