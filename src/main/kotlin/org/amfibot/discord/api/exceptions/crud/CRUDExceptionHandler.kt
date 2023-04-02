@@ -20,4 +20,15 @@ class CRUDExceptionHandler : ResponseEntityExceptionHandler() {
                 )
             )
     }
+    @ExceptionHandler(ResourceAlreadyExistsException::class)
+    fun resourceAlreadyExistsHandler(): ResponseEntity<ExceptionResponse> {
+        return ResponseEntity
+            .status(404)
+            .body(
+                ExceptionResponse(
+                    status = HttpStatus.valueOf(400),
+                    message = "The resource already exists."
+                )
+            )
+    }
 }
