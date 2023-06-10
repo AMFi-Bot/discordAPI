@@ -1,6 +1,5 @@
 package org.amfibot.discord.api.guild
 
-import org.amfibot.discord.api.exceptions.crud.ResourceAlreadyExistsException
 import org.amfibot.discord.api.exceptions.crud.ResourceNotFoundException
 import org.amfibot.discord.api.exceptions.http.client.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,42 +9,27 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 /**
- * Rest API methods collection for managing an entire discord guild object.
+ * Manages an entire discord guild object.
  *
- * Base path: /api/discord/guild
+ * Base path: /api/discord/guilds
  *
  */
 @RestController
-@RequestMapping("/api/discord/guilds")
+@RequestMapping("/api/discord/guilds/{guildId}")
 class GuildController(@Autowired private val repository: GuildRepository) {
 
     /**
      * Returns a discord guild object by guild id
      */
-    @GetMapping("/{guildId}")
+    @GetMapping
     fun getGuild(@PathVariable guildId: String): Guild =
         repository.findById(guildId).orElseThrow { ResourceNotFoundException() }
 
-    /**
-     * Creates a discord guild object
-     */
-    @PostMapping
-    fun createGuild(@RequestBody guild: Guild) : ResponseEntity<Any?>{
-        val guildId = guild.id
-
-        if (repository.existsById(guildId))
-            throw ResourceAlreadyExistsException()
-
-        repository.insert(guild)
-
-        return ResponseEntity(HttpStatus.CREATED)
-    }
-
 
     /**
      * Creates a discord guild object
      */
-    @PutMapping("/{guildId}")
+    @PutMapping
     fun updateGuild(@PathVariable guildId: String, @RequestBody guild: Guild) : ResponseEntity<Any?>{
         if (!repository.existsById(guildId))
             throw ResourceNotFoundException()
@@ -57,7 +41,7 @@ class GuildController(@Autowired private val repository: GuildRepository) {
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
-    @DeleteMapping("/{guildId}")
+    @DeleteMapping
     fun deleteGuild(@PathVariable guildId: String): ResponseEntity<Any?> {
         if (!repository.existsById(guildId))
             throw ResourceNotFoundException()
