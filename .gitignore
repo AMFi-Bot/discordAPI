@@ -10,5 +10,8 @@ target
 # Ignore IntelliJ IDEA files
 .idea
 
+# Ignore VSCode files
+.vscode
+
 # Ignore dotenv files
 .env
