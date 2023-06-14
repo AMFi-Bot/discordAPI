@@ -2,7 +2,7 @@ debug: true
 spring:
   devtools:
     remote:
-      secret: ${DEVTOOLS_REMOTE_SECRET:""}
+      secret: ${DEVTOOLS_REMOTE_SECRET}
     restart:
       enabled: true
       poll-interval: 3s
