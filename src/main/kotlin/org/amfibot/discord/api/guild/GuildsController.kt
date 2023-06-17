@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*
 
 
 import discord4j.discordjson.json.GuildUpdateData
+import jakarta.servlet.http.HttpServletRequest
 import org.amfibot.discord.api.helpers.guild.fetchGuildOAuth2Code
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -51,10 +52,10 @@ class GuildsController(
         @RequestParam("guild_id") guildId: String,
         @RequestParam("permissions") permissions: Int,
         @RequestParam("redirect_uri") redirectPathURI: String?,
-        //request: HttpRequest
+        request: HttpServletRequest
     ): GuildUpdateData {
-
-        val redirectURI: String = redirectPathURI ?: "http://localhost:3000/discord_bot_callback"//request.uri.toString()
+        // If the redirectURI is not provided, may be discord redirected directly to this endpoint
+        val redirectURI: String = redirectPathURI ?: request.requestURL.toString()
 
         return fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
     }
