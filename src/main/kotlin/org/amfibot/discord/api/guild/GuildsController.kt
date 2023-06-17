@@ -2,19 +2,13 @@ package org.amfibot.discord.api.guild
 
 import com.fasterxml.jackson.annotation.*
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 import discord4j.discordjson.json.GuildUpdateData
-
-import org.amfibot.discord.api.helpers.jackson.AsIsJsonDeserializer
-import org.amfibot.discord.api.helpers.jackson.discord.discordJSONMapper
+import org.amfibot.discord.api.helpers.guild.fetchGuildOAuth2Code
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestTemplate
 
 /**
  * Operates with the guilds registered in bot
@@ -45,7 +39,12 @@ class GuildsController(
         return repository.findById(guildId).isPresent
     }
 
-    /** Creates a discord guild object */
+    /**
+     * Registers a discord guild in the guilds list of the bot
+     *
+     * The guild should be provided as an authorization code that exchanges to the access token with the guild.
+     *
+     */
     @GetMapping("/register")
     fun createGuild(
         @RequestParam("code") code: String,
@@ -56,38 +55,7 @@ class GuildsController(
     ): GuildUpdateData {
 
         val redirectURI: String = redirectPathURI ?: "http://localhost:3000/discord_bot_callback"//request.uri.toString()
-        val restTemplate = RestTemplate()
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-
-        val map: MultiValueMap<String, String> = LinkedMultiValueMap()
-        map.add("client_id", discordClientId)
-        map.add("client_secret", discordClientSecret)
-        map.add("grant_type", "authorization_code")
-        map.add("code", code)
-        map.add("redirect_uri", redirectURI)
-
-        val request: HttpEntity<MultiValueMap<String, String>> = HttpEntity(map, headers)
-
-        val response = restTemplate.postForEntity(
-            "https://discord.com/api/v10/oauth2/token",
-            request,
-            GuildRegistrationAccessTokenJson::class.java
-        )
-
-        val body = response.body
-            ?: throw Exception("The response from a discord server is null.")
-
-        val mapper = discordJSONMapper
-
-        val guild = mapper.readValue(body.guild, GuildUpdateData::class.java)
-
-        return guild
+        return fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
     }
-
-    /**
-     * Use this class to parse the discord access token object containing the Guild
-     */
-    class GuildRegistrationAccessTokenJson(@JsonDeserialize(using = AsIsJsonDeserializer::class) val guild: String)
 }

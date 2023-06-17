@@ -42,7 +42,7 @@
       <dependency>
         <groupId>com.discord4j</groupId>
         <artifactId>discord-json</artifactId>
-        <version>1.7.5</version>
+        <version>1.7.6</version>
     </dependency>
 
       <!-- Kotlin -->
