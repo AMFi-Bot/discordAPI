@@ -2,9 +2,8 @@ package org.amfibot.discord.api.guild
 
 import com.fasterxml.jackson.annotation.*
 
-
-import discord4j.discordjson.json.GuildUpdateData
 import jakarta.servlet.http.HttpServletRequest
+import org.amfibot.discord.api.exceptions.http.client.BadRequestException
 import org.amfibot.discord.api.helpers.guild.fetchGuildOAuth2Code
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -53,10 +52,23 @@ class GuildsController(
         @RequestParam("permissions") permissions: Int,
         @RequestParam("redirect_uri") redirectPathURI: String?,
         request: HttpServletRequest
-    ): GuildUpdateData {
+    ): ResponseEntity<Guild?> {
         // If the redirectURI is not provided, may be discord redirected directly to this endpoint
         val redirectURI: String = redirectPathURI ?: request.requestURL.toString()
 
-        return fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
+        val guild =  fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
+
+        // Do some validations
+        if (guild.id().asString() != guildId) throw BadRequestException("Guild ID has been falsified")
+
+        val registeredGuild = repository.findById(guildId)
+
+        if (registeredGuild.isPresent)
+            return ResponseEntity(registeredGuild.get(), HttpStatus.OK)
+
+        // Register a guild
+        repository.insert(Guild(guildId))
+
+        return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 }
