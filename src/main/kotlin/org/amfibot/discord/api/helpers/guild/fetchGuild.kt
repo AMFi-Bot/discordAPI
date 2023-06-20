@@ -8,10 +8,12 @@ import org.amfibot.discord.api.exceptions.http.client.BadRequestException
 import org.amfibot.discord.api.helpers.jackson.discord.discordJSONMapper
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+
 
 /**
  * Fetches guild that provided within an oauth2 flow
@@ -20,7 +22,48 @@ fun fetchGuildOAuth2Code(
     code: String,
     redirectUri: String,
     discordClientId: String,
-    discordClientSecret: String): GuildUpdateData {
+    discordClientSecret: String
+): GuildUpdateData =
+    discordJSONMapper
+        .readValue(
+            fetchRawGuildOAuth2Code(code, redirectUri, discordClientId, discordClientSecret),
+            AccessTokenData::class.java
+        )
+        .guild()
+        .toOptional()
+        .orElseThrow { BadRequestException("The guild is not provided within an oauth2 flow.") }
+
+
+/**
+ * Fetches a guild from discord servers using bot token
+ */
+fun fetchGuild(
+    guildId: String,
+    botToken: String): GuildUpdateData =
+    discordJSONMapper
+        .readValue(
+            fetchRawGuild(guildId, botToken),
+            GuildUpdateData::class.java
+        )
+
+
+/**
+ * Fetches a guild channels from discord servers using bot token
+ */
+fun fetchGuildChannels(
+    guildId: String,
+    botToken: String): List<ChannelData> =
+    discordJSONMapper
+        .readValue(
+            fetchRawGuildChannels(guildId, botToken),
+            object : TypeReference<List<ChannelData>>(){}
+        )
+
+
+fun fetchRawGuildOAuth2Code(code: String,
+                            redirectUri: String,
+                            discordClientId: String,
+                            discordClientSecret: String): String {
     val restTemplate = RestTemplate()
 
     val headers = HttpHeaders()
@@ -41,20 +84,13 @@ fun fetchGuildOAuth2Code(
         String::class.java
     )
 
-    val body = response.body
+    return response.body
         ?: throw Exception("The response from a discord server is null.")
-
-    val accessTokenData = discordJSONMapper.readValue(body, AccessTokenData::class.java)
-
-    return accessTokenData.guild().toOptional().orElseThrow { BadRequestException("The guild is not provided within an oauth2 flow.") }
 }
 
-/**
- * Fetches a guild from discord servers using bot token
- */
-fun fetchGuild(
+fun fetchRawGuild(
     guildId: String,
-    botToken: String): GuildUpdateData {
+    botToken: String): String {
     val restTemplate = RestTemplate()
 
     val headers = HttpHeaders()
@@ -62,24 +98,20 @@ fun fetchGuild(
 
     val request = HttpEntity<Any?>(headers)
 
-    val response = restTemplate.postForEntity(
-        "https://discord.com/api/v10/guild/$guildId",
+    val response = restTemplate.exchange(
+        "https://discord.com/api/v10/guilds/$guildId",
+        HttpMethod.GET,
         request,
         String::class.java
     )
 
-    val body = response.body
+    return response.body
         ?: throw Exception("The response from a discord server is null.")
-
-    return discordJSONMapper.readValue(body, GuildUpdateData::class.java)
 }
 
-/**
- * Fetches a guild channels from discord servers using bot token
- */
-fun fetchGuildChannels(
+fun fetchRawGuildChannels(
     guildId: String,
-    botToken: String): List<ChannelData> {
+    botToken: String): String {
     val restTemplate = RestTemplate()
 
     val headers = HttpHeaders()
@@ -87,14 +119,13 @@ fun fetchGuildChannels(
 
     val request = HttpEntity<Any?>(headers)
 
-    val response = restTemplate.postForEntity(
-        "https://discord.com/api/v10/guild/$guildId",
+    val response = restTemplate.exchange(
+        "https://discord.com/api/v10/guilds/$guildId/channels",
+        HttpMethod.GET,
         request,
         String::class.java
     )
 
-    val body = response.body
+    return response.body
         ?: throw Exception("The response from a discord server is null.")
-
-    return discordJSONMapper.readValue(body, object : TypeReference<List<ChannelData>>(){})
 }

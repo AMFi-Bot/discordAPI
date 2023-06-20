@@ -1,11 +1,13 @@
 package org.amfibot.discord.api.guild
 
-import discord4j.discordjson.json.ChannelData
-import discord4j.discordjson.json.GuildUpdateData
 import org.amfibot.discord.api.exceptions.http.client.NotFoundException
-import org.amfibot.discord.api.helpers.guild.fetchGuild
-import org.amfibot.discord.api.helpers.guild.fetchGuildChannels
+import org.amfibot.discord.api.helpers.guild.fetchRawGuild
+import org.amfibot.discord.api.helpers.guild.fetchRawGuildChannels
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,16 +22,22 @@ class DiscordGuildProxy(
     private val repository: GuildRepository,
     @Value("\${DISCORD_BOT_TOKEN}") private val discordBotToken: String) {
     @GetMapping("/discord_base")
-    fun getBaseGuild(@PathVariable("guildId") guildId: String): GuildUpdateData{
+    fun getBaseGuild(@PathVariable("guildId") guildId: String): ResponseEntity<String> {
         if (!repository.existsById(guildId)) throw NotFoundException()
 
-        return fetchGuild(guildId, discordBotToken)
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        return ResponseEntity(fetchRawGuild(guildId, discordBotToken), headers, HttpStatus.OK)
     }
     @GetMapping("/channels")
-    fun getGuildChannels(@PathVariable("guildId") guildId: String): Collection<ChannelData>{
+    fun getGuildChannels(@PathVariable("guildId") guildId: String): ResponseEntity<String> {
         if (!repository.existsById(guildId)) throw NotFoundException()
 
-        return fetchGuildChannels(guildId, discordBotToken)
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        return ResponseEntity(fetchRawGuildChannels(guildId, discordBotToken), headers, HttpStatus.OK)
     }
 
 }
