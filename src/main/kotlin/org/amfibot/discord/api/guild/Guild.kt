@@ -1,6 +1,6 @@
 package org.amfibot.discord.api.guild
 
-import org.amfibot.discord.api.guild.modules.GeneralModule
+import org.amfibot.discord.api.guild.modules.general.GeneralModule
 import org.springframework.data.annotation.Id
 
 /**
