@@ -9,6 +9,10 @@ spring:
           issuer-uri: ${AS_JWT_ISSUER_URI}
   profiles:
     active: "prod"
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    username: ${RABBITMQ_DEFAULT_USER}
+    password: ${RABBITMQ_DEFAULT_PASS}
 server:
   error:
     whitelabel:
