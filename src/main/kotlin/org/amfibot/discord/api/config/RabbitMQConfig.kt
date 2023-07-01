@@ -2,6 +2,6 @@ package org.amfibot.discord.api.config
 
 
 enum class RabbitQueues(val queueName: String) {
-    REGISTERED_DISCORD_GUILD("registered_discord_guild"),
-    UPDATED_DISCORD_GUILD("updated_discord_guild"),
+    DISCORD_GUILD_REGISTERED("discord_guild.registered"),
+    DISCORD_GUILD_UPDATED("discord_guild.updated"),
 }

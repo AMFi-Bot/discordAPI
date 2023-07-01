@@ -3,8 +3,10 @@ package org.amfibot.discord.api.guild
 import com.fasterxml.jackson.annotation.*
 
 import jakarta.servlet.http.HttpServletRequest
+import org.amfibot.discord.api.config.RabbitQueues
 import org.amfibot.discord.api.exceptions.http.client.BadRequestException
 import org.amfibot.discord.api.helpers.guild.fetchGuildOAuth2Code
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -21,6 +23,7 @@ class GuildsController(
     @Autowired private val repository: GuildRepository,
     @Value("\${DISCORD_CLIENT_ID}") private val discordClientId: String,
     @Value("\${DISCORD_CLIENT_SECRET}") private val discordClientSecret: String,
+    @Autowired private val rabbitTemplate: RabbitTemplate
 ) {
 
     /**
@@ -56,7 +59,7 @@ class GuildsController(
         // If the redirectURI is not provided, may be discord redirected directly to this endpoint
         val redirectURI: String = redirectPathURI ?: request.requestURL.toString()
 
-        val guild =  fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
+        val guild = fetchGuildOAuth2Code(code, redirectURI, discordClientId, discordClientSecret)
 
         // Do some validations
         if (guild.id().asString() != guildId) throw BadRequestException("Guild ID has been falsified")
@@ -66,8 +69,17 @@ class GuildsController(
         if (registeredGuild.isPresent)
             return ResponseEntity(registeredGuild.get(), HttpStatus.OK)
 
+        val botGuild = Guild(guildId)
+
         // Register a guild
-        repository.insert(Guild(guildId))
+        repository.insert(botGuild)
+
+        // Broadcast listeners on guild registered event
+        rabbitTemplate.convertAndSend(
+            RabbitQueues.DISCORD_GUILD_REGISTERED.queueName,
+            botGuild
+        )
+
 
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
