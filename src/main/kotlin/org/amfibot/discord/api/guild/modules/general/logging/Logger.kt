@@ -11,7 +11,12 @@ interface Logger {
     /**
      * The logging channel id
      */
-    val loggingChannel: String
+    val loggingChannel: String?
+
+    /**
+     * The state (enabled or disabled) of the logger
+     */
+    val state: Boolean
 
     /**
      * The id (name) of the logger

@@ -6,4 +6,4 @@ import org.springframework.data.annotation.Id
 /**
  * Discord guild instance
  */
-data class Guild(@Id val id: String, val generalModule: GeneralModule = GeneralModule())
+data class Guild(@Id val id: String, val general: GeneralModule = GeneralModule())
