@@ -2,17 +2,24 @@ package org.amfibot.discord.api.user
 
 import discord4j.discordjson.json.UserData
 import discord4j.discordjson.json.UserGuildData
+import org.amfibot.discord.api.helpers.handleRateLimitFromResponseBody
 import org.amfibot.discord.api.helpers.jackson.discord.discordJSONMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.BadCredentialsException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
 
+val logger: Logger = LoggerFactory.getLogger("DiscordFetcher")
+
 /**
  * Fetches the discord user from the discord server
  */
 fun fetchDiscordUser(token: String): UserData {
+    logger.trace("fetch discord user")
+
     val httpClient = HttpClient.newHttpClient()
 
     val uri = URI("https://discord.com/api/v10/users/@me")
@@ -28,6 +35,12 @@ fun fetchDiscordUser(token: String): UserData {
     when (status) {
         200 -> return discordJSONMapper.readValue(body, UserData::class.java)
         401 -> throw DiscordTokenInvalidException()
+        429 -> {
+            handleRateLimitFromResponseBody(body)
+
+            return fetchDiscordUser(token)
+        }
+
         else -> {
             throw Exception(
                 "The discord server returned an error with status code: $status " +
@@ -41,6 +54,8 @@ fun fetchDiscordUser(token: String): UserData {
  * Fetches the discord user's guilds.
  */
 fun fetchDiscordUsersGuilds(token: String): Collection<UserGuildData> {
+    logger.trace("fetch discord user's guilds")
+
     val httpClient = HttpClient.newHttpClient()
 
     val uri = URI("https://discord.com/api/v10/users/@me/guilds")
@@ -58,6 +73,13 @@ fun fetchDiscordUsersGuilds(token: String): Collection<UserGuildData> {
             .readValue(body)
 
         401, 403 -> throw DiscordTokenInvalidException()
+
+        429 -> {
+            handleRateLimitFromResponseBody(body)
+
+            return fetchDiscordUsersGuilds(token)
+        }
+
         else -> {
             throw Exception(
                 "The discord server returned an error with status code: $status " +

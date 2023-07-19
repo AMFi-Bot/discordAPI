@@ -3,6 +3,7 @@ logging:
     org:
       springframework:
         security: INFO
+    DiscordFetcher: INFO
 spring:
   devtools:
     remote:
