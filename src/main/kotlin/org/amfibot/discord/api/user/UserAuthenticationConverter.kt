@@ -2,7 +2,7 @@ package org.amfibot.discord.api.user
 
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
-import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
@@ -21,7 +21,7 @@ class UserAuthenticationConverter(private val userRepository: UserRepository) :
             val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
 
             val authorities = grantedAuthoritiesConverter.convert(jwt)?.toMutableList() ?: mutableListOf()
-            authorities.add(GrantedAuthority { "SCOPE_discordUser" })
+            authorities.add(SimpleGrantedAuthority("SCOPE_discordUser"))
 
 
             val authentication = UserAuthenticationToken(user, authorities)

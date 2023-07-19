@@ -46,7 +46,7 @@ class SecurityConfig {
                     hasAuthority("SCOPE_discordUser")
                 )
                 authorize(
-                    "/api/discord/guilds/{guildId}",
+                    "/api/discord/guilds/{guildId}/**",
                     "@guildAuthorized.check(authentication,#guildId)"
                 )
                 authorize(anyRequest, authenticated)
