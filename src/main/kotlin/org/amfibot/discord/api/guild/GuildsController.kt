@@ -37,15 +37,18 @@ class GuildsController(
      */
     @PostMapping("/registered")
     fun isRegistered(@RequestBody guildsIds: Collection<String>, authentication: Authentication): Collection<String> {
-        val user = authentication.principal as User
+        val user = authentication.principal
+        val guilds = if (user is User) {
 
-        val userGuilds = fetchDiscordUsersGuilds(user.token)
+            val userGuilds = fetchDiscordUsersGuilds(user.token)
 
-        val guilds = guildsIds.filter { guildId ->
-            userGuilds.find {
-                (it.id().asString() == guildId) && (it.permissions().get().and(0x8L) == 0x8L)
-            } != null
-        }
+            guildsIds.filter { guildId ->
+                userGuilds.find {
+                    (it.id().asString() == guildId) && (it.permissions().get().and(0x8L) == 0x8L)
+                } != null
+            }
+        } else guildsIds
+
 
         return repository.findAllById(guilds).map { guild -> guild.id }
     }

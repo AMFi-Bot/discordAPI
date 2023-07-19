@@ -1,6 +1,9 @@
 package org.amfibot.discord.api.config
 
-import org.amfibot.discord.api.user.*
+import org.amfibot.discord.api.user.NwUserRepository
+import org.amfibot.discord.api.user.UserAuthenticationConverter
+import org.amfibot.discord.api.user.UserAuthenticationEntryPoint
+import org.amfibot.discord.api.user.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -8,7 +11,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtDecoders
 import org.springframework.security.oauth2.jwt.JwtValidators
@@ -36,8 +38,12 @@ class SecurityConfig {
                 authorize("/error", permitAll)
                 authorize("/", permitAll)
                 authorize(
-                    "/api/discord/guilds/register*/**",
-                    authenticated
+                    "/api/discord/guilds/register",
+                    hasAuthority("SCOPE_discordUser")
+                )
+                authorize(
+                    "/api/discord/guilds/registered/**",
+                    hasAuthority("SCOPE_discordUser")
                 )
                 authorize(
                     "/api/discord/guilds/{guildId}",
@@ -89,11 +95,11 @@ class SecurityConfig {
     fun jwtDecoder(@Value("\${AS_JWT_ISSUER_URI}") issuerUri: String): JwtDecoder {
         val jwtDecoder: NimbusJwtDecoder = JwtDecoders.fromIssuerLocation(issuerUri)
 
-        val userValidator = UserJWTValidator()
+        //val userValidator = UserJWTValidator()
         val withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri)
-        val withUser = DelegatingOAuth2TokenValidator(withIssuer, userValidator)
+        //val withUser = DelegatingOAuth2TokenValidator(withIssuer, userValidator)
 
-        jwtDecoder.setJwtValidator(withUser)
+        jwtDecoder.setJwtValidator(withIssuer)
 
         return jwtDecoder
     }

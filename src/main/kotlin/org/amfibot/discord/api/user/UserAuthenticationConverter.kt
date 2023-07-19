@@ -2,7 +2,9 @@ package org.amfibot.discord.api.user
 
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 
 /**
@@ -10,19 +12,24 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
  */
 class UserAuthenticationConverter(private val userRepository: UserRepository) :
     Converter<Jwt, AbstractAuthenticationToken> {
-    override fun convert(jwt: Jwt): AbstractAuthenticationToken {
-        val discordToken = jwt.getClaimAsString("discordAccessToken")
-        val user = userRepository.getUserFromToken(discordToken)
+    override fun convert(jwt: Jwt): AbstractAuthenticationToken? {
 
-        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
-        grantedAuthoritiesConverter.setAuthorityPrefix("SCOPE_")
+        return if (jwt.getClaimAsString("userType") == "discord" && jwt.hasClaim("discordAccessToken")) {
+            val discordToken = jwt.getClaimAsString("discordAccessToken")
+            val user = userRepository.getUserFromToken(discordToken)
 
-        val authorities = grantedAuthoritiesConverter.convert(jwt)
+            val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
+
+            val authorities = grantedAuthoritiesConverter.convert(jwt)?.toMutableList() ?: mutableListOf()
+            authorities.add(GrantedAuthority { "SCOPE_discordUser" })
 
 
-        val authentication = UserAuthenticationToken(user, authorities)
-        authentication.isAuthenticated = true
+            val authentication = UserAuthenticationToken(user, authorities)
+            authentication.isAuthenticated = true
 
-        return authentication
+            authentication
+        } else {
+            JwtAuthenticationConverter().convert(jwt)
+        }
     }
 }
