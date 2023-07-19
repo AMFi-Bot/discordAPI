@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.JwtDecoder
@@ -18,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
+@EnableWebSecurity
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity, @Autowired userRepository: UserRepository): SecurityFilterChain {
@@ -33,7 +35,14 @@ class SecurityConfig {
                 authorize("/.~~spring-boot!~/**", permitAll)
                 authorize("/error", permitAll)
                 authorize("/", permitAll)
-                //authorize("/api/discord/guilds", permitAll)//hasAuthority("SCOPE_discordGuilds"))
+                authorize(
+                    "/api/discord/guilds/register*/**",
+                    authenticated
+                )
+                authorize(
+                    "/api/discord/guilds/{guildId}",
+                    "@guildAuthorized.check(authentication,#guildId)"
+                )
                 authorize(anyRequest, authenticated)
             }
 

@@ -1,6 +1,7 @@
 package org.amfibot.discord.api.user
 
 import discord4j.discordjson.json.UserData
+import discord4j.discordjson.json.UserGuildData
 import org.amfibot.discord.api.helpers.jackson.discord.discordJSONMapper
 import org.springframework.security.authentication.BadCredentialsException
 import java.net.URI
@@ -34,6 +35,37 @@ fun fetchDiscordUser(token: String): UserData {
             )
         }
     }
+}
+
+/**
+ * Fetches the discord user's guilds.
+ */
+fun fetchDiscordUsersGuilds(token: String): Collection<UserGuildData> {
+    val httpClient = HttpClient.newHttpClient()
+
+    val uri = URI("https://discord.com/api/v10/users/@me/guilds")
+    val request = HttpRequest.newBuilder(uri)
+        .header("Authorization", "Bearer $token")
+        .build()
+
+    val response = httpClient.send(request, BodyHandlers.ofString(Charsets.UTF_8))
+
+    val status = response.statusCode()
+    val body = response.body()
+
+    when (status) {
+        200 -> return discordJSONMapper.readerForListOf(UserGuildData::class.java)
+            .readValue(body)
+
+        401, 403 -> throw DiscordTokenInvalidException()
+        else -> {
+            throw Exception(
+                "The discord server returned an error with status code: $status " +
+                        "and body\n$body"
+            )
+        }
+    }
+
 }
 
 /**
